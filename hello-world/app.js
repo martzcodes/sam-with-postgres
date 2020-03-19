@@ -1,5 +1,4 @@
-// const axios = require('axios')
-// const url = 'http://checkip.amazonaws.com/';
+const { Client } = require("pg");
 let response;
 
 /**
@@ -15,13 +14,21 @@ let response;
  * 
  */
 exports.lambdaHandler = async (event, context) => {
+    const client = new Client({
+      user: "postgres",
+      host: "localhost",
+      password: "martzcodesshouldhaveabetterpassword"
+    });
+    await client.connect();
+    const res = await client.query("SELECT * from hello_table ORDER BY id DESC LIMIT 1");
+    const hello = `${res.rows[0].hello_source} says hello to ${res.rows[0].hello_target}`;
+    console.log(hello); // Shows "Matt says hello to Whit""
+    await client.end();
     try {
-        // const ret = await axios(url);
         response = {
             'statusCode': 200,
             'body': JSON.stringify({
-                message: 'hello world',
-                // location: ret.data.trim()
+                message: hello,
             })
         }
     } catch (err) {

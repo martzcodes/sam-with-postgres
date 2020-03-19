@@ -38,3 +38,18 @@ exports.lambdaHandler = async (event, context) => {
 
     return response
 };
+
+exports.sayHandler = async (event, context) => {
+  const client = new Client({
+    user: "postgres",
+    host: "localhost",
+    password: "martzcodesshouldhaveabetterpassword"
+  });
+  await client.connect();
+  const body = JSON.parse(event.body);
+  const queryText =
+    "INSERT INTO hello_table(hello_source, hello_target) VALUES($1, $2) RETURNING (hello_source, hello_target)";
+  await client.query(queryText, [body.source, body.target]);
+  await client.end();
+  return exports.lambdaHandler(event, context);
+};
